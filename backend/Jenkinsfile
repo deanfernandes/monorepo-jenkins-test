@@ -1,0 +1,41 @@
+pipeline {
+  agent any
+
+  environment {
+    DOTNET_CLI_TELEMETRY_OPTOUT = "1"
+  }
+
+  stages {
+    stage('Restore') {
+      steps {
+        dir('backend') {
+          sh 'dotnet restore'
+        }
+      }
+    }
+
+    stage('Build') {
+      steps {
+        dir('backend') {
+          sh 'dotnet build --no-restore --configuration Release'
+        }
+      }
+    }
+
+    stage('Test') {
+      steps {
+        dir('backend') {
+          sh 'dotnet test --no-build --configuration Release'
+        }
+      }
+    }
+
+    stage('Publish') {
+      steps {
+        dir('backend') {
+          sh 'dotnet publish -c Release -o publish'
+        }
+      }
+    }
+  }
+}
