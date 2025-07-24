@@ -5,6 +5,11 @@ pipeline {
     nodejs 'Node 24'
   }
 
+  environment {
+    USERNAME = credentials('username')
+    HOST = credentials('host')
+  }
+
   stages {
     stage('Install dependencies') {
       steps {
@@ -26,6 +31,20 @@ pipeline {
       steps {
         dir('frontend') {
           sh 'npm run build'
+        }
+      }
+    }
+
+    stage('Deploy') {
+      steps {
+        sshagent(['key']) {
+          dir('frontend') {
+            sh '''
+              echo "Deploying to server..."
+              scp -r build/* ${USERNAME}@${HOST}:/var/www/frontend/
+              echo "Deployment done."
+            '''
+          }
         }
       }
     }
