@@ -3,6 +3,8 @@ pipeline {
 
   environment {
     DOTNET_CLI_TELEMETRY_OPTOUT = "1"
+    USERNAME = credentials('username')
+    HOST = credentials('host')
   }
 
   stages {
@@ -34,6 +36,21 @@ pipeline {
       steps {
         dir('backend') {
           sh 'dotnet publish -c Release -o publish'
+        }
+      }
+    }
+
+    stage('Deploy') {
+      steps {
+        sshagent(['key']) {
+          dir('backend') {
+            sh '''
+              echo "Deploying backend to server..."
+              scp -r backend/publish/* ${USERNAME}@${HOST}:/var/www/backend/
+              ssh ${USERNAME}@${HOST} "sudo systemctl restart backend.service"
+              echo "Deployment complete and service restarted."
+            '''
+          }
         }
       }
     }
