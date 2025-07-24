@@ -46,7 +46,7 @@ pipeline {
           dir('backend') {
             sh '''
               echo "Deploying backend to server..."
-              scp -r backend/publish/* ${USERNAME}@${HOST}:/var/www/backend/
+              scp -r publish/* ${USERNAME}@${HOST}:/var/www/backend/
               ssh ${USERNAME}@${HOST} "sudo systemctl restart backend.service"
               echo "Deployment complete and service restarted."
             '''
